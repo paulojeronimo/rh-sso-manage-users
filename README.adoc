@@ -9,12 +9,15 @@ ifdef::env-localhost[:imagesdir: ../images]
 ifdef::env-github[:imagesdir: ./images]
 :idprefix:
 :idseparator: -
+:nofooter:
 
 // URIs
 :uri-rh-sso-rest-api: https://access.redhat.com/webassets/avalon/d/red-hat-single-sign-on/version-7.3/restapi/
 :uri-git: https://github.com/paulojeronimo/rh-sso-manage-users
+:uri-keycloak-labs: https://paulojeronimo.com/keycloak-labs
 
 // Attributes
+:keycloak-labs: {uri-keycloak-labs}[keycloak-labs^]
 :config-sample: {uri-raw}/config.sample[config.sample^]
 :test-one-user-sh: {uri-raw}/test-one-user.sh[test-one-user.sh^]
 :create-users-sh: {uri-raw}/create-users.sh[create-users.sh^]
@@ -29,9 +32,14 @@ Keycloak) com um `Service Accounts Enabled`.
 
 Os scripts utilizam a {uri-rh-sso-rest-api}[REST API^] de administração
 do RH-SSO para que, através do uso de comandos como o `curl`, seja
-possível <<passo4,adicionar uma massa de usuários>>, <<passo5,obter
-tokens válidos para cada usuário>> e, por fim, <<passo6,remover esses
-usuários>> quando eles não forem mais necessários.
+possível <<passo4,criar uma massa de usuários>>, <<passo5,obter
+um token válido para cada usuário criado>> e, por fim,
+<<passo6,remover esses usuários>> quando eles não forem mais
+necessários.
+
+NOTE: O RH-SSO pode ser, rapidamente, instalado e configurado para
+utilizar um PostgreSQL ou um Microsoft SQL Server utilizando o projeto
+{keycloak-labs}.
 
 [[passo0]]
 == Passo 0 - Baixe (ou clone) esse projeto (licença: MIT)
