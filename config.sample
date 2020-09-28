@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+#################################
+# commont to all script variables
+TMP_DIR=${TMP_DIR:-"tmp"}
+LOG_FILE=${LOG_FILE:-`basename "$0" .sh`.log}
+USE_BASIC_AUTH=${USE_BASIC_AUTH:-false}
+#################################
+
+####################
+# Keycloak variables
+SSO_URL=${SSO_URL:-'http://localhost:8180/auth'}
+REALM=${REALM:-"demo"}
+CLIENT_ID=${CLIENT_ID:-"xpto"}
+CLIENT_SECRET=${CLIENT_SECRET:-"4032347b-2223-4354-bd53-516e4d7354ee"}
+####################
+
+#################################
+# add-users.sh specific variables
+USER_PREFIX=${USER_PREFIX:-"testuser"}
+PASSWORD_SIZE=${PASSWORD_SIZE:-10}
+NB_OF_USERS=${NB_OF_USERS:-30}
+NB_OF_USER_PER_DOT=${NB_OF_USER_PER_DOT:-3}
+LEADING_ZEROS=${LEADING_ZEROS:-`echo -n $NB_OF_USERS | wc -c | xargs`}
+CREATED_USERS_FILE=${CREATED_USERS_FILE:-"created-users.csv"}
+#################################
+
+##################################
+# get-tokens.sh specific variables
+TOKENS_FILE=${TOKENS_FILE:-"tokens.csv"}
+##################################

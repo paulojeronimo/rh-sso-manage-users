@@ -1,0 +1,268 @@
+= RH-SSO: Gerenciamento de usuários via API
+Paulo Jerônimo <paulojeronimo@gmail.com>, {localdatetime}
+:toc: left
+:toc-title: Conteúdo
+:icons: font
+:uri-raw: https://raw.githubusercontent.com/paulojeronimo/rh-sso-manage-users/master
+:imagesdir: {uri-raw}/images
+ifdef::env-localhost[:imagesdir: ../images]
+ifdef::env-github[:imagesdir: images]
+:idprefix:
+:idseparator: -
+
+// URIs
+:uri-rh-sso-rest-api: https://access.redhat.com/webassets/avalon/d/red-hat-single-sign-on/version-7.3/restapi/
+:uri-git: https://github.com/paulojeronimo/rh-sso-manage-users
+
+// Attributes
+:config-sample: {uri-raw}/config.sample[config.sample^]
+:test-one-user-sh: {uri-raw}/test-one-user.sh[test-one-user.sh^]
+:create-users-sh: {uri-raw}/create-user.sh[create-users.sh^]
+:get-tokens-sh: {uri-raw}/get-tokens.sh[get-tokens.sh^]
+:delete-users-sh: {uri-raw}/delete-users.sh[delete-users.sh^]
+
+== Introdução
+
+Esses projeto demonstra, passo a passo, o uso de scripts escritos em
+Bash para gerenciar usuários em um `client` configurado no RH-SSO (ou no
+Keycloak) com um `Service Accounts Enabled`.
+
+Os scripts utilizam a {uri-rh-sso-rest-api}[REST API^] de administração
+do RH-SSO para que, através do uso de comandos como o `curl`, seja
+possível <<passo4,adicionar uma massa de usuários>>, <<passo5,obter
+tokens válidos para cada usuário>> e, por fim, <<passo6,remover esses
+usuários>> quando eles não forem mais necessários.
+
+[[passo0]]
+== Passo 0 - Baixe (ou clone) esse projeto (licença: MIT)
+
+[subs="attributes+"]
+----
+$ git clone {uri-git}
+$ cd `basename _$`
+----
+
+[[passo1]]
+== Passo 1 - Crie um client no RH-SSO
+
+Crie um `Realm` e um `Client` no RH-SSO.
+No {uri-raw}/config.sample[arquivo de configuração de exemplo^], o
+cliente está nomeado como `xpto` e está configurado no `Realm` `demo`,
+conforme as seguintes imagens:
+
+.Xpto Settings
+image::xpto-client.1.png[]
+
+[NOTE]
+.Na tela acima, observe as seguintes configurações:
+====
+. `Access Type`: `confidential`.
+. `Direct Acess Grants Enabled`: true
+. `Service Accounts Enabled`: true
+====
+
+image::xpto-client.2.png[]
+
+[NOTE]
+.Na tela acima, observe as seguintes configurações:
+====
+. Para o `Client Roles`, observe que as seguintes `Roles` estão
+  associadas:
+.. `manage-users`.
+.. `view-users`.
+====
+
+
+[[passo2]]
+== Passo 2 - Ajuste o arquivo de configuração deste projeto
+
+Copie o arquivo `config.sample` para `config` e faça os ajustes
+necessários, conforme o ambiente, em suas variáveis.
+
+Conteúdo do arquivo {config-sample}:
+
+----
+include::config.sample[]
+----
+
+[[passo3]]
+== Passo 3 - Execute o script test-one-user.sh
+
+O script {test-one-user-sh} deverá criar (e apagar) um único usuário no
+`Realm` configurado, no intuito de testar se a configuração para a
+realização das próximas operações está ok.
+
+Exemplo de execução:
+
+----
+$ ./test-one-user.sh
+Base dir is "/Users/pj/labs/rh-sso-manage-users".
+Configured variables (excluding sensitive):
+   TMP_DIR: tmp
+   LOG_FILE: test-one-user.log
+   USE_BASIC_AUTH: false
+   SSO_URL: http://localhost:8180/auth
+   REALM: demo
+   CLIENT_ID: xpto
+   USER_PREFIX: testuser
+   PASSWORD_SIZE: 10
+   NB_OF_USERS: 30
+   NB_OF_USER_PER_DOT: 3
+   LEADING_ZEROS: 2
+   CREATED_USERS_FILE: created-users.csv
+   TOKENS_FILE: tokens.csv
+These variables was read from "./config.sample" file.
+Generated files adjusted to be created in "tmp" directory.
+
+One user test started!
+Adding user "testuser-31" ... ok
+Recovered user id: 4e800d63-1b54-44d5-b9c0-e3f549ccf555
+Getting token for client "xpto" ... ok
+User token saved in "tmp/test-one-user.csv"!
+Deleting user ... ok
+Test completed successfuly!
+----
+
+[[passo4]]
+== Passo 4 - Execute o script create-users.sh
+
+O script {create-users-sh} deverá criar o número de usuários
+configurados em {config-sample} no `Realm` configurado.
+
+Exemplo de execução:
+
+----
+$ time ./create-users.sh
+Base dir is "/Users/pj/labs/rh-sso-manage-users".
+Configured variables (excluding sensitive):
+   TMP_DIR: tmp
+   LOG_FILE: create-users.log
+   USE_BASIC_AUTH: false
+   SSO_URL: http://localhost:8180/auth
+   REALM: demo
+   CLIENT_ID: xpto
+   USER_PREFIX: testuser
+   PASSWORD_SIZE: 10
+   NB_OF_USERS: 30
+   NB_OF_USER_PER_DOT: 3
+   LEADING_ZEROS: 2
+   CREATED_USERS_FILE: created-users.csv
+   TOKENS_FILE: tokens.csv
+These variables was read from "./config.sample" file.
+Generated files adjusted to be created in "tmp" directory.
+Adding users (each "." represents 3 users) ...
+..........
+File "tmp/created-users.csv" created!
+Number of users created: 30.
+
+real    0m3.939s
+user    0m0.318s
+sys     0m0.425s
+----
+
+NOTE: A execução do script através do comando `time` é opcional!
+Ela serve apenas para ter uma idéia do tempo de execução do script.
+
+O arquivo gerado que contém os usuários (`tmp/created-users.csv`) deverá
+ter um conteúdo semelhante ao apresentado pela saída do comando abaixo:
+
+----
+$ head -n 3 tmp/created-users.csv
+Username,Password
+testuser-01,JJQFNZ9M8T
+testuser-02,ZvMda8N6rI
+----
+
+Também, após a execução desse script, os usuários poderão ser
+visualizados pela interface administrativa do RH-SSO, como apresentado
+na figura abaixo:
+
+image::demo-users.png[]
+
+[[passo5]]
+== Passo 5 - Execute o script get-tokens.sh
+
+O script {get-tokens-sh} deverá obter tokens para o número de usuários
+criados no passo anterior.
+
+NOTE: Esses tokens são criados apenas para testar a autenticação de
+acesso ao próprio cliente `xpto`.
+Caso seja necessário obter um token para outro cliente, ajuste o script!
+
+Exemplo de execução:
+
+----
+$ time ./get-tokens.sh
+Base dir is "/Users/pj/labs/rh-sso-manage-users".
+Configured variables (excluding sensitive):
+   TMP_DIR: tmp
+   LOG_FILE: get-tokens.log
+   USE_BASIC_AUTH: false
+   SSO_URL: http://localhost:8180/auth
+   REALM: demo
+   CLIENT_ID: xpto
+   USER_PREFIX: testuser
+   PASSWORD_SIZE: 10
+   NB_OF_USERS: 30
+   NB_OF_USER_PER_DOT: 3
+   LEADING_ZEROS: 2
+   CREATED_USERS_FILE: created-users.csv
+   TOKENS_FILE: tokens.csv
+These variables was read from "./config.sample" file.
+Generated files adjusted to be created in "tmp" directory.
+Getting users tokens (each "." represents 3 users) ...
+Adding users (each "." represents 3 users) ...
+..........
+File "tmp/tokens.csv" created!
+Number of tokens created: 30.
+
+real    0m3.932s
+user    0m1.135s
+sys     0m0.408s
+----
+
+O arquivo gerado que contem os tokens (`tmp/tokens.csv`) deverá ter um
+conteúdo como o apresentado a seguir:
+
+----
+$ head -n 3 tmp/tokens.csv
+Username,Token (for "xpto" client)
+testuser-01,eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJRSXhYc2NQUjVldzZhWkJ3NFZqRTdlcDEyYVFNb2l3MjZsRzc0aV82MG9NIn0.eyJqdGkiOiI2MTBlZDUwMS1iZjZmLTQyOTMtOGYwZC0xMzRiOGExMzJhYTgiLCJleHAiOjE2MDEzMDExOTEsIm5iZiI6MCwiaWF0IjoxNjAxMzAwNTkxLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgxODAvYXV0aC9yZWFsbXMvZGVtbyIsImF1ZCI6ImFjY291bnQiLCJzdWIiOiIwOTFmOTU4ZC0xZjMyLTQ1ODEtYjU1OS0xNTFlMTIyNWNhYjciLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJ4cHRvIiwiYXV0aF90aW1lIjowLCJzZXNzaW9uX3N0YXRlIjoiYjU5Njg3MWMtY2ZmMy00MGM2LTg4ZTMtMzM2ODdiOThmYTBhIiwiYWNyIjoiMSIsInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJvZmZsaW5lX2FjY2VzcyIsInVtYV9hdXRob3JpemF0aW9uIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJlbWFpbCBwcm9maWxlIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJ0ZXN0dXNlci0wMSJ9.DyKL9jJDl78p3MeLCf1Q6a2mZYxZyqmLjkfbAJpcH89T-MG_WedaxYYN9lXz9EPLdDY_9qf0gH6BUWAaDowE-Thy9iVkEP4NFYxL3C0sHUkqI2si8VNw-0o9PcEyLDWQXojpAXnMaEg09VW2u9mroDEvqyLPbJybVZpbAaUn5BlZBDmjGQMmhBoPkYmR06fxlVTES-qMLH4t_aaQ-PMm7RI7dN3A2i98eSCO-1Dk2yQYIO8wdNrZdWrJhOdEhc-p3nA-7C5vIy-PZn9DY34w4JOvSPMM4gJvy3Y6oq_tZi-Xa3ROLsJa8endAHN0R_2EDn-Ts0FHcoexbfl4VKcTdQ
+testuser-02,eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJRSXhYc2NQUjVldzZhWkJ3NFZqRTdlcDEyYVFNb2l3MjZsRzc0aV82MG9NIn0.eyJqdGkiOiIyOWJjYTEwZi1jZGMwLTQ0ODctYjVhMC00N2E3MjJjZDAyMzgiLCJleHAiOjE2MDEzMDExOTEsIm5iZiI6MCwiaWF0IjoxNjAxMzAwNTkxLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgxODAvYXV0aC9yZWFsbXMvZGVtbyIsImF1ZCI6ImFjY291bnQiLCJzdWIiOiJkYWVmNTVlNS02YTk1LTRhYTMtOTI4Ny0zNTZiMzRlMGUxYTQiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJ4cHRvIiwiYXV0aF90aW1lIjowLCJzZXNzaW9uX3N0YXRlIjoiMTM0MTA4Y2YtMmM3YS00NmNkLWJmN2UtYjFkM2I1MjRmYzBhIiwiYWNyIjoiMSIsInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJvZmZsaW5lX2FjY2VzcyIsInVtYV9hdXRob3JpemF0aW9uIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJlbWFpbCBwcm9maWxlIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJ0ZXN0dXNlci0wMiJ9.YzeuXePmcONX-EcY5qFNi0mqf-YEcw7QsiDJ00RpdigInC4-RcCclRu8AoDW1kit-7kxV0De9Mgf3LqOiULwzxC6P6ddOAydu_Frl4aM4PXDiWH-o0IoJzdDK_NkkDlUHSv3JF3UAXnEc7f--ZcB41DoCgNXtWNKU6dxBwmpv8VPG6NR1LyWB3s9kS6mrIJIEjcSfiB4vs_PgQS-NWTU-SbNA7njZqxGACP6sbyflqKjXMI-sd9vzkdHzbFwAMc61NmYy7QIL5mX67KRBs-v-F4HBQypqu4MFU6eEl0jKz3CFwujT8mMCuPXamoLJt_H2TJULOPjA7qPMFaFzpQePQ
+----
+
+[[passo6]]
+== Passo 6 - Execute o Script delete-users.sh
+
+O script {delete-users-sh} deverá remover os usuários
+criados no <<passo4,passo 4>>.
+
+Exemplo de execução:
+
+----
+$ time ./delete-users.sh
+Base dir is "/Users/pj/labs/rh-sso-manage-users".
+Configured variables (excluding sensitive):
+   TMP_DIR: tmp
+   LOG_FILE: delete-users.log
+   USE_BASIC_AUTH: false
+   SSO_URL: http://localhost:8180/auth
+   REALM: demo
+   CLIENT_ID: xpto
+   USER_PREFIX: testuser
+   PASSWORD_SIZE: 10
+   NB_OF_USERS: 30
+   NB_OF_USER_PER_DOT: 3
+   LEADING_ZEROS: 2
+   CREATED_USERS_FILE: created-users.csv
+   TOKENS_FILE: tokens.csv
+These variables was read from "./config.sample" file.
+Generated files adjusted to be created in "tmp" directory.
+Deleting users (each "." represents 3 users) ...
+..........
+Number of users deleted: 30.
+
+real    0m1.998s
+user    0m1.364s
+sys     0m0.575s
+----
