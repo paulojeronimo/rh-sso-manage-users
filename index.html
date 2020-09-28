@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.10">
-<meta name="author" content="Paulo Jerônimo &lt;paulojeronimo@gmail.com&gt;, 2020-09-28 11:25:26 -0300">
+<meta name="author" content="Paulo Jerônimo &lt;paulojeronimo@gmail.com&gt;, 2020-09-28 12:50:13 -0300">
 <title>RH-SSO: Gerenciamento de usuários via API</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
@@ -442,7 +442,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="header">
 <h1>RH-SSO: Gerenciamento de usuários via API</h1>
 <div class="details">
-<span id="author" class="author">Paulo Jerônimo &lt;paulojeronimo@gmail.com&gt;, 2020-09-28 11:25:26 -0300</span><br>
+<span id="author" class="author">Paulo Jerônimo &lt;paulojeronimo@gmail.com&gt;, 2020-09-28 12:50:13 -0300</span><br>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Conteúdo</div>
@@ -470,9 +470,24 @@ Keycloak) com um <code>Service Accounts Enabled</code>.</p>
 <div class="paragraph">
 <p>Os scripts utilizam a <a href="https://access.redhat.com/webassets/avalon/d/red-hat-single-sign-on/version-7.3/restapi/" target="_blank" rel="noopener">REST API</a> de administração
 do RH-SSO para que, através do uso de comandos como o <code>curl</code>, seja
-possível <a href="#passo4">adicionar uma massa de usuários</a>, <a href="#passo5">obter
-tokens válidos para cada usuário</a> e, por fim, <a href="#passo6">remover esses
-usuários</a> quando eles não forem mais necessários.</p>
+possível <a href="#passo4">criar uma massa de usuários</a>, <a href="#passo5">obter
+um tokens válido para cada usuário criado</a> e, por fim,
+<a href="#passo6">remover esses usuários</a> quando eles não forem mais
+necessários.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+O RH-SSO pode ser, rapidamente, instalado e configurado para
+utilizar um PostgreSQL ou um Microsoft SQL Server utilizando o projeto
+<a href="https://paulojeronimo.com/keycloak-labs" target="_blank" rel="noopener">keycloak-labs</a>.
+</td>
+</tr>
+</table>
 </div>
 </div>
 </div>
@@ -840,11 +855,6 @@ sys     0m0.575s</pre>
 </div>
 </div>
 </div>
-</div>
-</div>
-<div id="footer">
-<div id="footer-text">
-Last updated 2020-09-28 11:23:38 -0300
 </div>
 </div>
 </body>
