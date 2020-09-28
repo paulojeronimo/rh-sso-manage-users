@@ -6,7 +6,7 @@ Paulo Jerônimo <paulojeronimo@gmail.com>, {localdatetime}
 :uri-raw: https://raw.githubusercontent.com/paulojeronimo/rh-sso-manage-users/master
 :imagesdir: {uri-raw}/images
 ifdef::env-localhost[:imagesdir: ../images]
-ifdef::env-github[:imagesdir: images]
+ifdef::env-github[:imagesdir: ./images]
 :idprefix:
 :idseparator: -
 
@@ -17,7 +17,7 @@ ifdef::env-github[:imagesdir: images]
 // Attributes
 :config-sample: {uri-raw}/config.sample[config.sample^]
 :test-one-user-sh: {uri-raw}/test-one-user.sh[test-one-user.sh^]
-:create-users-sh: {uri-raw}/create-user.sh[create-users.sh^]
+:create-users-sh: {uri-raw}/create-users.sh[create-users.sh^]
 :get-tokens-sh: {uri-raw}/get-tokens.sh[get-tokens.sh^]
 :delete-users-sh: {uri-raw}/delete-users.sh[delete-users.sh^]
 
